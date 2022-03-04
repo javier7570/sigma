@@ -1,17 +1,27 @@
 use statrs::distribution::Normal;
+use rand::distributions::Distribution;
 use rand::Rng;
 
 use crate::stats;
 
-pub fn gaussian_random_walk(n: usize, mean: f64, std: f64) -> Vec<f64> {
-    let result = gaussian_white_noise(n, mean, std);
+pub fn random_walk<D: Distribution<f64>>(n: usize, d: &D) -> Vec<f64> {
+    let result = white_noise(n, d);
     let mut x = 0.0;
     result.iter().map(|w| { x += w; x }).collect()
 }
 
+pub fn gaussian_random_walk(n: usize, mean: f64, std: f64) -> Vec<f64> {
+    let normal = Normal::new(mean, std).unwrap();
+    random_walk(n, &normal)
+}
+
+pub fn white_noise<D: Distribution<f64>>(n: usize, d: &D) -> Vec<f64> {
+    rand::thread_rng().sample_iter(d).take(n).collect()
+}
+
 pub fn gaussian_white_noise(n: usize, mean: f64, std: f64) -> Vec<f64> {
     let normal = Normal::new(mean, std).unwrap();
-    rand::thread_rng().sample_iter(&normal).take(n).collect()
+    white_noise(n, &normal)
 }
 
 pub fn diff(v: &[f64], lag: usize) -> Vec<f64> {
