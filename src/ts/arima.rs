@@ -5,11 +5,12 @@ pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64>
     let ar_len = ar.len();
     let ma_len = ma.len();
     let arma_len = ar_len + ma_len;
+    let arima_len = arma_len + d;
 
-    let noise = random::gaussian_white_noise(n + arma_len, std);
+    let noise = random::gaussian_white_noise(n + arima_len, std);
     let n_len = noise.len();
 
-    let mut tmp = Vec::with_capacity(n + arma_len);
+    let mut tmp = Vec::with_capacity(n + arima_len);
 
     //Moving average part
     for i in ma_len..n_len {
@@ -20,17 +21,17 @@ pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64>
         tmp.push(x)
     }
 
-    for i in arma_len..n + arma_len {
+    for i in arma_len..n_len {
         let mut x = noise[i];
         for j in 0..ar_len {
             x += ar[j] * tmp[i - j - 1];
         }
-        tmp.push(x);
+        tmp[i] = x;
     }
     if d > 0 {
-        stats::diff(&tmp[ar_len..], d)
+        stats::diff(&tmp[arma_len..], d)
     }
     else {
-        tmp.drain(ar_len..).collect()
+        tmp.drain(arma_len..).collect()
     }
 }
