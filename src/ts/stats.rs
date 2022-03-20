@@ -12,14 +12,27 @@ pub fn variance(v: &[f64]) -> f64
 pub fn diff(v: &[f64], lag: usize) -> Vec<f64> {
     let n = v.len();
     if n >= lag {
-        let mut result: Vec<f64> = Vec::with_capacity(n - lag);
-        for i in lag..n - 1 {
-            result.push(v[i] - v[i - lag])
+        let mut result = Vec::with_capacity(n - lag);
+        for i in 0..n - lag {
+            result.push(v[i + lag] - v[i]);
         }
         result
     }
     else {
         Vec::with_capacity(0)
+    }
+}
+
+pub fn diff_emplace(v: &mut Vec<f64>, lag: usize)  {
+    let n = v.len();
+    if n >= lag {
+        for i in 0..n - lag {
+            v[i] = v[i + lag] - v[i];
+        }
+        v.truncate(n - lag);
+    }
+    else {
+        v.clear();
     }
 }
 
