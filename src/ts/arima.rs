@@ -28,10 +28,12 @@ pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64>
         }
         tmp[i] = x;
     }
-    if d > 0 {
-        stats::diff(&tmp[arma_len..], d)
+
+    for i in 0..d {
+        for j in 0..n - i {
+            tmp[j] = tmp[j + 1] - tmp[j];
+        }
     }
-    else {
-        tmp.drain(arma_len..).collect()
-    }
+
+    tmp.drain(arma_len..n + arma_len).collect()
 }
