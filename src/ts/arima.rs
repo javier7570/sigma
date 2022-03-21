@@ -1,5 +1,4 @@
 use crate::ts::random;
-use crate::ts::stats;
 
 pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64> {
     let ar_len = ar.len();
