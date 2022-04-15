@@ -1,3 +1,3 @@
 # Sigma
 
-Library with some tools time series analisis.
+Library with some tools time series analysis.
