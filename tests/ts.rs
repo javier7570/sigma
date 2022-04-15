@@ -1,12 +1,12 @@
 
-    fn check_eq(a: f64, b: f64, err: f64) -> bool {
-        if a >= b + err || a <= b - err {
-            false
-        }
-        else {
-            true
-        }
+fn check_eq(a: f64, b: f64, err: f64) -> bool {
+    if a >= b + err || a <= b - err {
+        false
     }
+    else {
+        true
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -22,6 +22,6 @@ mod tests {
         let variance = stats::variance(&v);
 
         assert_eq!(check_eq(mean, 0.0, 0.1), true);
-        assert_eq!(check_eq(variance, 4.0, 0.25), true);
+        assert_eq!(check_eq(variance, 4.0, 0.2), true);
     }
 }
