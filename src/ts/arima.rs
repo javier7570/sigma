@@ -1,4 +1,5 @@
 use crate::ts::random;
+use crate::ts::stats;
 
 pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64> {
     let ar_len = ar.len();
@@ -12,22 +13,31 @@ pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64>
     let mut tmp = Vec::with_capacity(n + arima_len);
 
     //Moving average part
+    for i in 0..ma_len {
+        tmp.push(noise[i]); 
+    }
+
     for i in ma_len..n_len {
         let mut x: f64 = noise[i];
         for j in 0..ma_len {
             x += ma[j] * noise[i - j - 1];
         }
-        tmp.push(x)
+        tmp.push(x);
     }
 
     for i in arma_len..n_len {
-        let mut x = noise[i];
-        for j in 0..ar_len {
-            x += ar[j] * tmp[i - j - 1];
+        if i < 50 {
+           println!("---");
         }
-        tmp[i] = x;
+        for j in 0..ar_len {
+            if i < 50 {
+                println!("{}", tmp[i - j -1]);
+            }
+            tmp[i] += ar[j] * tmp[i - j - 1];
+        }
     }
 
+    println!("Mn1 --> {}", stats::mean(&tmp));
     for i in 0..d {
         for j in 0..n - i {
             tmp[j] = tmp[j + 1] - tmp[j];
