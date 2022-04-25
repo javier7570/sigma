@@ -1,5 +1,4 @@
 use crate::ts::random;
-use crate::ts::stats;
 
 pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64> {
     let ar_len = ar.len();
@@ -26,18 +25,11 @@ pub fn sim_gwn(n: usize, ar: &[f64], d: usize, ma: &[f64], std: f64) -> Vec<f64>
     }
 
     for i in arma_len..n_len {
-        if i < 50 {
-           println!("---");
-        }
         for j in 0..ar_len {
-            if i < 50 {
-                println!("{}", tmp[i - j -1]);
-            }
             tmp[i] += ar[j] * tmp[i - j - 1];
         }
     }
 
-    println!("Mn1 --> {}", stats::mean(&tmp));
     for i in 0..d {
         for j in 0..n - i {
             tmp[j] = tmp[j + 1] - tmp[j];
