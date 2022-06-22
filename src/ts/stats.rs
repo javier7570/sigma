@@ -9,6 +9,32 @@ pub fn variance(v: &[f64]) -> f64
     v.iter().fold(0.0, |sum, val| sum + (val - mean).powi(2)) / v.len() as f64
 }
 
+fn moving(v: &[f64], size: usize, fun: impl Fn(&[f64]) -> f64) -> Vec<f64> {
+    let mut result: Vec<f64>;
+    let len = v.len();
+    if len >= size && size != 0 {
+         result = Vec::with_capacity(len - size + 1);
+
+         let mut index = 0;
+         for win in v.windows(size) {
+            result[index] = fun(win);
+            index += 1;
+         }
+    }
+    else {
+        result = Vec::with_capacity(0);
+    }
+    result
+}
+
+pub fn moving_mean(v: &[f64], size: usize) -> Vec<f64> {
+    moving(v, size, mean)
+}
+
+pub fn moving_var(v: &[f64], size: usize) -> Vec<f64> {
+    moving(v, size, variance)
+}
+
 pub fn diff(v: &[f64], lag: usize) -> Vec<f64> {
     let n = v.len();
     if n >= lag {
@@ -57,6 +83,18 @@ pub fn autocov(v: &[f64], max_lags: usize) -> Vec<f64> {
     result
 }
 
+
+/// Calculates the autocorrelation function for the given time series
+///
+/// # Arguments
+///
+/// * `v` - Time series
+/// * `max_lags` - Standad deviation for the Gaussian distribution
+/// 
+/// #Returns
+/// 
+/// * A vector of n random values using the distribution d.
+///
 pub fn acf(v: &[f64], max_lags: usize) -> Vec<f64> {
    let result = autocov(v, max_lags);
    let s0 = result[0];
