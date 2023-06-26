@@ -12,25 +12,45 @@ type linkedListIterator[T any] struct {
 	node *linkedListNode[T]
 }
 
-func (it *linkedListIterator[T]) Next() (T, bool) {
+func (it *linkedListIterator[T]) HasNext() bool {
+	if it.node != nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (it *linkedListIterator[T]) Next() T {
 	var void T
 	if it.node != nil {
 		aux := it.node
 		it.node = it.node.next
-		return aux.value, true
+		return aux.value
 	} else {
-		return void, false
+		return void
 	}
 }
 
-func (it *linkedListIterator[T]) Prev() (T, bool) {
+type linkedListReverseIterator[T any] struct {
+	node *linkedListNode[T]
+}
+
+func (it *linkedListReverseIterator[T]) HasNext() bool {
+	if it.node != nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (it *linkedListReverseIterator[T]) Next() T {
 	var void T
 	if it.node != nil {
 		aux := it.node
 		it.node = it.node.prev
-		return aux.value, true
+		return aux.value
 	} else {
-		return void, false
+		return void
 	}
 }
 
@@ -71,12 +91,12 @@ func (list *linkedListImpl[T]) GetLast() (T, bool) {
 	}
 }
 
-func (list *linkedListImpl[T]) First() common.Iterator[T] {
+func (list *linkedListImpl[T]) CreateIterator() common.Iterator[T] {
 	return &linkedListIterator[T]{list.first}
 }
 
-func (list *linkedListImpl[T]) Last() common.Iterator[T] {
-	return &linkedListIterator[T]{list.last}
+func (list *linkedListImpl[T]) CreateReverseIterator() common.Iterator[T] {
+	return &linkedListReverseIterator[T]{list.last}
 }
 
 func (list *linkedListImpl[T]) PushFront(value T) {

@@ -1,34 +1,17 @@
 package list
 
 import (
-	"common"
-
 	"github.com/stretchr/testify/assert"
 )
 
 func checkListEmpty(list List[int], assert *assert.Assertions) {
-	_, ok := list.First().Value()
+	_, ok := list.GetFirst()
 	assert.False(ok, "Check list empty: First")
-	_, ok = list.Last().Value()
+	_, ok = list.GetLast()
 	assert.False(ok, "Check list empty: Last")
 	assert.Equal(uint(0), list.Size(), "Check list size")
-}
-
-func checkIteratorNext(it common.Iterator[int], value int, assert *assert.Assertions) {
-	next_value, ok := it.Next()
-	assert.True(ok, "Check not nil")
-	assert.Equal(value, next_value, "Check value")
-}
-
-func checkIteratorPrev(it common.Iterator[int], value int, assert *assert.Assertions) {
-	next_value, ok := it.Prev()
-	assert.True(ok, "Check not nil")
-	assert.Equal(value, next_value, "Check value")
-}
-
-func checkIteratorEndOfList(it common.Iterator[int], assert *assert.Assertions) {
-	_, ok := it.Value()
-	assert.False(ok, "Check no more elements")
+	assert.False(list.CreateIterator().HasNext(), "Check iterator end of list")
+	assert.False(list.CreateReverseIterator().HasNext(), "Check reverse iterator end of list")
 }
 
 func PushFront(list List[int], assert *assert.Assertions) {
@@ -37,14 +20,14 @@ func PushFront(list List[int], assert *assert.Assertions) {
 	for i := 1; i <= 10; i++ {
 		list.PushFront(i)
 
-		value, ok := list.First().Value()
+		value, ok := list.GetFirst()
 		if assert.True(ok, "Check first not nil") {
 			assert.Equal(i, value, "Check first value")
 		}
 	}
 	assert.Equal(uint(10), list.Size(), "Check list size")
 
-	value, ok := list.Last().Value()
+	value, ok := list.GetLast()
 	assert.True(ok, "Check last not nil")
 	assert.Equal(1, value, "Check last value")
 }
@@ -55,14 +38,14 @@ func PushBack(list List[int], assert *assert.Assertions) {
 	for i := 1; i <= 10; i++ {
 		list.PushBack(i)
 
-		value, ok := list.Last().Value()
+		value, ok := list.GetLast()
 		if assert.True(ok, "Check last not nil") {
 			assert.Equal(i, value, "Check last value")
 		}
 	}
 	assert.Equal(uint(10), list.Size(), "Check list size")
 
-	value, ok := list.First().Value()
+	value, ok := list.GetFirst()
 	assert.True(ok, "Check first not nil")
 	assert.Equal(1, value, "Check first value")
 }
@@ -107,12 +90,10 @@ func PopBack(list List[int], assert *assert.Assertions) {
 func Iterate(list List[int], assert *assert.Assertions) {
 	//Iterate forward over empty list
 	checkListEmpty(list, assert)
-	it := list.First()
-	checkIteratorEndOfList(it, assert)
+	assert.False(list.CreateIterator().HasNext(), "Check forward iterator empty")
 
 	//Iterate backward over empty list
-	it = list.Last()
-	checkIteratorEndOfList(it, assert)
+	assert.False(list.CreateReverseIterator().HasNext(), "Check reverse iterator empty")
 
 	//Insert numbers from 1 to 200
 	for i := 100; i >= 1; i-- {
@@ -122,18 +103,20 @@ func Iterate(list List[int], assert *assert.Assertions) {
 	assert.Equal(uint(200), list.Size(), "Check list size")
 
 	//Iterate forward
-	it = list.First()
+	it := list.CreateIterator()
 	for i := 1; i <= 200; i++ {
-		checkIteratorNext(it, i, assert)
+		assert.True(it.HasNext(), "Check forward iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iterator value")
 	}
-	checkIteratorEndOfList(it, assert)
+	assert.False(it.HasNext(), "Check forward iterator more elements")
 
 	//Iterate backward
-	it = list.Last()
+	it = list.CreateReverseIterator()
 	for i := 200; i >= 1; i-- {
-		checkIteratorPrev(it, i, assert)
+		assert.True(it.HasNext(), "Check reverse iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iteratorvalue")
 	}
-	checkIteratorEndOfList(it, assert)
+	assert.False(it.HasNext(), "Check reverse iterator no more elements")
 }
 
 func Reverse(list List[int], assert *assert.Assertions) {
@@ -153,19 +136,20 @@ func Reverse(list List[int], assert *assert.Assertions) {
 	assert.Equal(uint(200), list.Size(), "Check list size")
 
 	//Iterate forward
-	it := list.First()
+	it := list.CreateIterator()
 	for i := 200; i >= 1; i-- {
-		checkIteratorNext(it, i, assert)
+		assert.True(it.HasNext(), "Check forward iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iterator value")
 	}
-	_, ok := it.Next()
-	assert.False(ok, "Check no more elements")
+	assert.False(it.HasNext(), "Check forward iterator more elements")
 
 	//Iterate backward
-	it = list.Last()
+	it = list.CreateReverseIterator()
 	for i := 1; i <= 200; i++ {
-		checkIteratorPrev(it, i, assert)
+		assert.True(it.HasNext(), "Check reverse iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iteratorvalue")
 	}
-	checkIteratorEndOfList(it, assert)
+	assert.False(it.HasNext(), "Check reverse iterator no more elements")
 }
 
 func Exists(list List[int], assert *assert.Assertions) {
@@ -261,11 +245,13 @@ func Filter(list List[int], assert *assert.Assertions) {
 		}
 	})
 	assert.Equal(uint(5), list.Size(), "Check list size")
-	it := list.First()
+
+	it := list.CreateIterator()
 	for i := 2; i <= 10; i += 2 {
-		checkIteratorNext(it, i, assert)
+		assert.True(it.HasNext(), "Check forward iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iterator value")
 	}
-	checkIteratorEndOfList(it, assert)
+	assert.False(it.HasNext(), "Check forward iterator more elements")
 
 	//Remove all elements
 	list.Filter(func(x int) bool {
@@ -304,11 +290,13 @@ func FilterNot(list List[int], assert *assert.Assertions) {
 		}
 	})
 	assert.Equal(uint(5), list.Size(), "Check list size")
-	it := list.First()
+
+	it := list.CreateIterator()
 	for i := 2; i <= 10; i += 2 {
-		checkIteratorNext(it, i, assert)
+		assert.True(it.HasNext(), "Check forward iterator has next")
+		assert.Equal(i, it.Next(), "Check forward iterator value")
 	}
-	checkIteratorEndOfList(it, assert)
+	assert.False(it.HasNext(), "Check forward iterator more elements")
 
 	//Remove all elements
 	list.FilterNot(func(x int) bool {

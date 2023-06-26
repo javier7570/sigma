@@ -3,9 +3,8 @@ package common
 import "golang.org/x/exp/constraints"
 
 type Iterator[T any] interface {
-	Next() (T, bool)
-	Prev() (T, bool)
-	Value() (T, bool)
+	HasNext() bool
+	Next() T
 }
 
 type Condition[T any] func(item T) bool
@@ -15,8 +14,11 @@ type Action[T any] func(item T)
 type Container[T any] interface {
 	Size() uint
 
-	First() Iterator[T]
-	Last() Iterator[T]
+	GetFirst() (T, bool)
+	GetLast() (T, bool)
+
+	CreateIterator() Iterator[T]
+	CreateReverseIterator() Iterator[T]
 
 	Exists(cond Condition[T]) bool
 	ForAll(cond Condition[T]) bool
