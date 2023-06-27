@@ -3,8 +3,7 @@ package common
 import "golang.org/x/exp/constraints"
 
 type Iterator[T any] interface {
-	HasNext() bool
-	Next() T
+	Next() (T, bool)
 }
 
 type Condition[T any] func(item T) bool

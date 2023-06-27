@@ -12,22 +12,14 @@ type linkedListIterator[T any] struct {
 	node *linkedListNode[T]
 }
 
-func (it *linkedListIterator[T]) HasNext() bool {
-	if it.node != nil {
-		return true
-	} else {
-		return false
-	}
-}
-
-func (it *linkedListIterator[T]) Next() T {
+func (it *linkedListIterator[T]) Next() (T, bool) {
 	var void T
 	if it.node != nil {
 		aux := it.node
 		it.node = it.node.next
-		return aux.value
+		return aux.value, true
 	} else {
-		return void
+		return void, false
 	}
 }
 
@@ -35,22 +27,14 @@ type linkedListReverseIterator[T any] struct {
 	node *linkedListNode[T]
 }
 
-func (it *linkedListReverseIterator[T]) HasNext() bool {
-	if it.node != nil {
-		return true
-	} else {
-		return false
-	}
-}
-
-func (it *linkedListReverseIterator[T]) Next() T {
+func (it *linkedListReverseIterator[T]) Next() (T, bool) {
 	var void T
 	if it.node != nil {
 		aux := it.node
 		it.node = it.node.prev
-		return aux.value
+		return aux.value, true
 	} else {
-		return void
+		return void, false
 	}
 }
 
