@@ -180,16 +180,8 @@ func (list *linkedListImpl[T]) Filter(cond common.Condition[T]) {
 }
 
 func (list *linkedListImpl[T]) FilterNot(cond common.Condition[T]) {
-	it := list.first
-	for it != nil {
-		if cond(it.value) {
-			aux := it
-			it = it.next
-			removeLinkedListNode(list, aux)
-		} else {
-			it = it.next
-		}
-	}
+	var cond_not common.Condition[T] = func(item T) bool { return !cond(item) }
+	list.Filter(cond_not)
 }
 
 func (list *linkedListImpl[T]) ForEach(action common.Action[T]) {

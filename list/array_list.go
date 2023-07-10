@@ -1,6 +1,8 @@
 package list
 
-import "common"
+import (
+	"common"
+)
 
 type arrayListIterator[T any] struct {
 	index uint
@@ -168,7 +170,7 @@ func (list *arrayListImpl[T]) Reverse() {
 
 func (list *arrayListImpl[T]) Exists(cond common.Condition[T]) bool {
 	exists := false
-	if list.first < list.capacity {
+	if list.size > 0 {
 		finish := false
 		for i := list.first; !finish && !exists; i = (i + 1) % list.capacity {
 			if cond(list.values[i]) {
@@ -182,7 +184,7 @@ func (list *arrayListImpl[T]) Exists(cond common.Condition[T]) bool {
 
 func (list *arrayListImpl[T]) ForAll(cond common.Condition[T]) bool {
 	all_true := true
-	if list.first < list.capacity {
+	if list.size > 0 {
 		finish := false
 		for i := list.first; !finish && all_true; i = (i + 1) % list.capacity {
 			if !cond(list.values[i]) {
@@ -195,13 +197,48 @@ func (list *arrayListImpl[T]) ForAll(cond common.Condition[T]) bool {
 }
 
 func (list *arrayListImpl[T]) Filter(cond common.Condition[T]) {
+	var void T
+	if list.size > 0 {
+		empty_index := list.capacity
+		finish := false
+
+		for i := list.first; !finish; i = (i + 1) % list.capacity {
+			if !cond(list.values[i]) {
+				if empty_index == list.capacity {
+					empty_index = i
+				}
+				list.size--
+			} else {
+				if empty_index != list.capacity {
+					list.values[empty_index] = list.values[i]
+					empty_index = (empty_index + 1) % list.capacity
+				}
+			}
+			finish = (i == list.last)
+		}
+
+		//Clean empty nodes
+		finish = false
+		for i := empty_index; !finish; i = (i + 1) % list.capacity {
+			list.values[i] = void
+			finish = (i == list.last)
+		}
+		if list.size == 0 {
+			list.first = list.capacity
+			list.last = list.capacity
+		} else {
+			list.last = (list.first + list.size - 1) % list.capacity
+		}
+	}
 }
 
 func (list *arrayListImpl[T]) FilterNot(cond common.Condition[T]) {
+	var cond_not common.Condition[T] = func(item T) bool { return !cond(item) }
+	list.Filter(cond_not)
 }
 
 func (list *arrayListImpl[T]) ForEach(action common.Action[T]) {
-	if list.first < list.capacity {
+	if list.size > 0 {
 		finish := false
 		for i := list.first; !finish; i = (i + 1) % list.capacity {
 			action(list.values[i])
